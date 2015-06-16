@@ -67,10 +67,16 @@ Failures:
      NoMethodError:
        undefined method `actor=' for #<Character id: nil, name: "Khaleesi", show_id: nil
 ```
-----
-Let's talk about associating our models. How do our models relate to each other in real life? A character `belongs_to` an actor. An actor `has_many` characters and `has_many` shows through characters. Aside belonging to an actor, the character also `belongs_to` a show. A show `has_many` characters, `has_many` actors through characters and it `belongs_to` a network. A network `has_many` shows.
+### Discussing the associations in this domain model
+Let's talk about associating our models. How do our models relate to each other in real life? How many characters is an actor playing? Is a character only played by one actor? For the purpose of this lab we are going to asume that a character is played by one actor and an actor can play many characters. We also are going to asume that a show belongs to a network.
+
+So, a character `belongs_to` an actor and an actor `has_many` characters. 
+Aside belonging to an actor, the character also `belongs_to` a show. A show `has_many` characters, and it `belongs_to` a network. A network `has_many` shows.
+
+But how are actors and shows related? Since characters are directly related to shows and actors, an actor can "know" about its shows through its characters. Likewise, a show knows about its actors through its characters. So we can say that an actor `has_many :shows, through: :characters` and also that a show `has_many :actors, through: :characters`.
 
 
+### Creating the associations
 We created the Actor and Character tabels in the database but we did not add the association between them to the code in our models. So for this test to pass you will have to add `belongs_to :actor` into your Character model and `has_many :characters` to your Actor model. This is a macro that creates, among other methods, an `actor=` method in the `Character` model. For more about this, you can refer to the [ActiveRecord documentation](http://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html).
 
 Your new error message now is:
@@ -87,11 +93,10 @@ Failures:
      ActiveModel::MissingAttributeError:
        can't write unknown attribute `actor_id`
 ```
-----
+### Adding a foreign key
 Because a character `belongs_to` an actor, which means there can only be one actor playing this character, we need to insert the foreign key `actor_id` in the characters table. If we had the foreign key in the actors table, we would keep adding data to our table horizontally and this would break the relational database rules.
 
-
-Now we need to tell the tables how to connect to each other by adding the `actor_id` to your Character model by creating a new migration `006_add_actor_id_to_characters.rb` 
+Now we need to tell the tables how to connect to each other by adding the `actor_id` to the characters table, creating a new migration `006_add_actor_id_to_characters.rb` for this.
 
 ```ruby
 class AddActorIdToCharacters < ActiveRecord::Migration
@@ -187,7 +192,6 @@ Lets write the list_roles method in our actor model.
 
 ```ruby
 def list_roles
-  
 end
 ```
 ```ruby
@@ -269,8 +273,8 @@ and after running `rake db:migrate`, the next failure we see when we run rspec i
 
 ```ruby
 def say_that_thing_you_say
-    "#{self.name} always says: #{self.catchphrase}"
-  end
+  "#{self.name} always says: #{self.catchphrase}"
+end
 ```
 Run rspec again
 
@@ -342,3 +346,5 @@ class AddGenreToShow < ActiveRecord::Migration
   end
 end
 ```
+
+Now all the tests should be passing!
