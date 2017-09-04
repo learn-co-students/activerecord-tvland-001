@@ -1,4 +1,5 @@
 require_relative 'spec_helper'
+require 'pry'
 
 describe Show do
   let(:show) {Show.new}
